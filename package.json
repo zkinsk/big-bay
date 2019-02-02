@@ -1,0 +1,24 @@
+{
+  "name": "big-bay",
+  "version": "1.0.0",
+  "description": "not-ebay",
+  "main": "greatBay.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkinsk/big-bay.git"
+  },
+  "author": "The Gang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zkinsk/big-bay/issues"
+  },
+  "homepage": "https://github.com/zkinsk/big-bay#readme",
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "inquirer": "^6.2.2",
+    "mysql": "^2.16.0"
+  }
+}
