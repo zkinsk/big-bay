@@ -27,7 +27,7 @@ function greatBayAuction() {
         } 
         else if (auction.questionOne === "Make a bid on a current auction"){
             startBidding() 
-        }else{ process.exit() }
+        }else{ logout() }
     });
 }
 
@@ -50,6 +50,7 @@ function makeBid(animal, userBid) {
         if (err) throw err;
         currentBid = res.current_bid;
         if (userBid > currentBid) {
+            console.log(`Congrats, you are now top bidder at \$${userBid}!`)
             "UPDATE auctions SET ? WHERE ?",
             [
                 {
@@ -59,9 +60,11 @@ function makeBid(animal, userBid) {
                     item_name: animal
                 }
             ]
+            greatBayAuction();
         }
         else {
-            console.log("Your bid is too low!");
+            console.log("Your bid is too low!")
+            reStart(animal, userBid);
         }
     });
 }; //end of makeBid fn
@@ -125,7 +128,36 @@ function newAuctionItem(){
         run();
     });
 }
+function reStart(animal, oldBid){
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "goAgain",
+            message: "Would you like to bid again?",
+            choices: ["Yes", "No"]
+        }
+        ]).then(function(ans){
+            if(ans.goAgain === "Yes"){
+                console.log(`You need to bid more than \$${oldBid} for a ${animal}`)
+                inquirer.prompt([
+                    {
+                        type: "input",
+                        name: "userBid",
+                        message: "What is your bid?",
+                        validate: validatePrice
+                    }
+                ]).then(function(newBid){
+                    let userBid = newBid.userBid;
+                    makeBid(animal, userBid);
+                })
+            }else{ greatBayAuction() }
+        })
+}
 
+
+function logout(){
+    process.exit()
+}
 
 //start the auction!
 greatBayAuction();
