@@ -40,27 +40,37 @@ function run() {
     connection.query("SELECT * FROM auctions", function(err, res) {
         if (err) throw err;
         console.log(res);
+        for (let x in res){
+            console.log(`Item Name: ${res[x].name}  Current Bid: ${res[x].current_bid}\n`)
+        }
         console.log("----------------------");
+        greatBayAuction();
     });
 }
 
 function makeBid(animal, userBid) { 
     
-    connection.query("SELECT ? FROM auctions", [animal], function(err, res) {
+    // connection.query("SELECT ? FROM auctions", [animal], function(err, res) 
+    connection.query('SELECT * FROM `auctions` WHERE `name` = ?', [animal],function(err, res, fields){
         if (err) throw err;
-        currentBid = res.current_bid;
+        let currentBid = res[0].current_bid;
+        // console.log("current bid: " + currentBid);
+        // console.log("user bid: " + userBid); 
         if (userBid > currentBid) {
             console.log(`Congrats, you are now top bidder at \$${userBid}!`)
-            "UPDATE auctions SET ? WHERE ?",
+            connection.query("UPDATE auctions SET ? WHERE ?",
             [
                 {
                     current_bid: userBid
                 },
                 {
-                    item_name: animal
+                    name: animal
                 }
-            ]
-            greatBayAuction();
+            ],
+            function(err, res){
+                // console.log(res)
+                greatBayAuction();
+            });
         }
         else {
             console.log("Your bid is too low!")
@@ -69,13 +79,15 @@ function makeBid(animal, userBid) {
     });
 }; //end of makeBid fn
 
+
+
 function startBidding(){
     console.log("Preparing bid options...")
     connection.query("SELECT * FROM auctions", function(err, res) {
         if (err) throw err;
         inquirer.prompt([
             {
-                type: "list",
+                type: "rawlist",
                 name: "auctionList",
                 message: "Select the item you would like to bid on:",
                 choices: res
@@ -87,7 +99,7 @@ function startBidding(){
             }
         ]).then(function(newBid){
             let bidItem = newBid.auctionList;
-            let userBid = newBid.userBid;
+            let userBid = parseFloat(newBid.userBid);
             makeBid(bidItem, userBid);
         })
     });
@@ -111,7 +123,7 @@ function newAuctionItem(){
         var newItem = newAuction.newItem;
                        
         
-        var initialBid = newAuction.initialBid;
+        var initialBid = parseFloat(newAuction.initialBid);
         var currentBid = initialBid;
 
         var query = connection.query("INSERT INTO auctions SET?", 
@@ -124,7 +136,6 @@ function newAuctionItem(){
             if (err) throw err;
             console.log(query.sql)
         });
-
         run();
     });
 }
@@ -154,10 +165,24 @@ function reStart(animal, oldBid){
         })
 }
 
+function readTable(){
+    // console.log("Selecting all products...\n");
+    let animal = "Fish Bird"
+    connection.query('SELECT * FROM `auctions` WHERE `name` = ?', [animal],function(err, res, fields) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+    //   console.log(fields);
+      connection.end();
+    });
+}
+
 
 function logout(){
-    process.exit()
+    connection.end();
+    process.exit();
 }
 
 //start the auction!
 greatBayAuction();
+// readTable();
